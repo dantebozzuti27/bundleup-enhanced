@@ -1,60 +1,43 @@
-// ============================================
-// API ROUTE: /api/parse-intent
-// Intent Parser - Decomposes user goals
-// ============================================
-
-import { NextResponse } from 'next/server';
-import IntentParser from '@/lib/intent-parser';
+// app/api/parse-intent/route.js
+import { cachedLLM } from '@/lib/llm';
 
 export async function POST(request) {
-  try {
-    const { userIntent, userId } = await request.json();
-    
-    if (!userIntent || typeof userIntent !== 'string') {
-      return NextResponse.json(
-        { error: 'User intent is required' },
-        { status: 400 }
-      );
-    }
-    
-    // Initialize Intent Parser
-    const parser = new IntentParser();
-    
-    // Parse the intent
-    const parsedIntent = await parser.parseIntent(
-      userIntent,
-      userId ? { userId } : null
+  const { prompt } = await request.json();
+
+  if (!prompt?.trim()) {
+    return new Response(
+      JSON.stringify({ error: 'Prompt is required' }),
+      { status: 400, headers: { 'Content-Type': 'application/json' } }
     );
-    
-    // Validate the parsed intent
-    const validation = parser.validateIntent(parsedIntent);
-    
-    if (!validation.isValid) {
-      return NextResponse.json({
-        success: false,
-        parsedIntent,
-        validation
-      }, { status: 200 });
-    }
-    
-    return NextResponse.json({
-      success: true,
-      parsedIntent,
-      validation
-    });
-    
-  } catch (error) {
-    console.error('Intent parsing error:', error);
-    
-    return NextResponse.json(
-      { 
-        error: 'Failed to parse intent',
-        details: error.message 
-      },
-      { status: 500 }
+  }
+
+  try {
+    const llmResponse = await cachedLLM(prompt, 'anthropic');
+
+    // ---- Simple parser (replace with your own logic) ----
+    const categories = [
+      'Graphics Card (GPU)',
+      'CPU (Processor)',
+      'Motherboard',
+      'RAM (Memory)',
+      'Primary Storage (SSD)',
+      'Power Supply Unit (PSU)',
+      'CPU Cooler',
+      'PC Case',
+    ];
+
+    const roadmap = categories.map((name) => ({
+      name,
+      products: [], // filled later by search-and-optimize
+    }));
+    // ----------------------------------------------------
+
+    return Response.json({ roadmap });
+  } catch (err) {
+    console.error(err);
+    return new Response(
+      JSON.stringify({ error: 'LLM failed' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
 }
-
-export const runtime = 'nodejs';
-export const maxDuration = 30;

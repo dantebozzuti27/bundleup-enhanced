@@ -1,14 +1,15 @@
-import './globals.css'
+// app/layout.js
+import './globals.css';
 
 export const metadata = {
-  title: 'BundleUp - Intent-to-Solution Engine',
-  description: 'AI-powered problem solving for complex purchases',
-}
+  title: 'BundleUp Enhanced',
+  description: 'AI-powered PC builder',
+};
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className="antialiased">{children}</body>
     </html>
-  )
+  );
 }
