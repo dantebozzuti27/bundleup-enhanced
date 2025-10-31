@@ -1,18 +1,6 @@
-﻿# Dependencies
-node_modules/
-
-# Environment
+﻿node_modules/
 .env
 .env.local
-.env.*.local
-
-# Build / cache
 dist/
 build/
 .next/
-.out/
-
-# IDE / OS
-.vscode/
-.idea/
-.DS_Store
