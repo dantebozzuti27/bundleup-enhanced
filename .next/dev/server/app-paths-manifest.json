@@ -1,0 +1,7 @@
+{
+  "/api/generate-roadmap/route": "app/api/generate-roadmap/route.js",
+  "/api/parse-intent/route": "app/api/parse-intent/route.js",
+  "/api/search-and-optimize/route": "app/api/search-and-optimize/route.js",
+  "/page": "app/page.js",
+  "/solution-engine/page": "app/solution-engine/page.js"
+}
