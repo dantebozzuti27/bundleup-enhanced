@@ -10,7 +10,7 @@ export default function SolutionEngine() {
   const [input, setInput] = useState('');
 
   const generate = async () => {
-    if (!input.trim()) return alert('Enter a prompt');
+    if (!input.trim()) return alert('Enter your goal');
 
     setLoading(true);
     try {
@@ -20,15 +20,11 @@ export default function SolutionEngine() {
         body: JSON.stringify({ prompt: input }),
       });
 
-      if (!res.ok) {
-        const txt = await res.text();
-        throw new Error(txt);
-      }
+      if (!res.ok) throw new Error(await res.text());
 
       const data = await res.json();
-      setRoadmap(data.roadmap || data);
+      setRoadmap(data.roadmap);
     } catch (err) {
-      console.error(err);
       alert('Error: ' + err.message);
     } finally {
       setLoading(false);
@@ -36,42 +32,35 @@ export default function SolutionEngine() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-8">
-      <div className="max-w-2xl mx-auto text-center mb-12">
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">
-          BundleUp Enhanced
-        </h1>
-        <p className="text-gray-600">Tell me what you need — I’ll build your PC.</p>
-      </div>
+    <div className="min-h-screen p-4 md:p-8">
+      <div className="max-w-3xl mx-auto">
+        <h1 className="text-3xl font-bold text-center mb-8">Intent-to-Solution Engine</h1>
 
-      <div className="max-w-2xl mx-auto mb-12 space-y-4">
         <textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="e.g., Gaming PC for 4K, $1500 budget"
-          className="w-full p-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-          rows="4"
+          placeholder="e.g., Build a home theater"
+          className="w-full p-4 rounded-lg border border-gray-300 mb-4"
+          rows="3"
         />
         <button
           onClick={generate}
           disabled={loading}
-          className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50 transition"
+          className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 disabled:opacity-50"
         >
-          {loading ? 'Building…' : 'Generate Build'}
+          {loading ? 'Analyzing...' : 'Generate Solution'}
         </button>
+
+        {loading && (
+          <div className="mt-8 space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="h-24 bg-gray-200 rounded-xl animate-pulse"></div>
+            ))}
+          </div>
+        )}
+
+        {roadmap && <Roadmap items={roadmap} />}
       </div>
-
-      {/* Skeleton */}
-      {loading && (
-        <div className="max-w-4xl mx-auto space-y-4">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-32 bg-gray-200 rounded-xl animate-pulse"></div>
-          ))}
-        </div>
-      )}
-
-      {/* Roadmap */}
-      {roadmap && <Roadmap items={roadmap} />}
     </div>
   );
 }

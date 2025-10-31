@@ -5,39 +5,23 @@ export async function POST(request) {
   const { prompt } = await request.json();
 
   if (!prompt?.trim()) {
-    return new Response(
-      JSON.stringify({ error: 'Prompt is required' }),
-      { status: 400, headers: { 'Content-Type': 'application/json' } }
-    );
+    return new Response('Prompt required', { status: 400 });
   }
 
   try {
-    const llmResponse = await cachedLLM(prompt, 'anthropic');
+    const llmResponse = await cachedLLM(prompt);
 
-    // ---- Simple parser (replace with your own logic) ----
-    const categories = [
-      'Graphics Card (GPU)',
-      'CPU (Processor)',
-      'Motherboard',
-      'RAM (Memory)',
-      'Primary Storage (SSD)',
-      'Power Supply Unit (PSU)',
-      'CPU Cooler',
-      'PC Case',
-    ];
+    // Extract components from LLM
+    const components = llmResponse
+      .split('\n')
+      .filter(line => line.includes('→') || line.match(/^\d+\./))
+      .map(line => line.replace(/^\d+\.\s*|→/g, '').trim())
+      .filter(Boolean);
 
-    const roadmap = categories.map((name) => ({
-      name,
-      products: [], // filled later by search-and-optimize
-    }));
-    // ----------------------------------------------------
+    const roadmap = components.map(name => ({ name, products: [] }));
 
     return Response.json({ roadmap });
   } catch (err) {
-    console.error(err);
-    return new Response(
-      JSON.stringify({ error: 'LLM failed' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    );
+    return new Response('LLM failed', { status: 500 });
   }
 }
