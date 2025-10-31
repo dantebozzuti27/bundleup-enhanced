@@ -10,31 +10,38 @@ export async function POST(request) {
   }
 
   try {
-    // Step 1: AI Decompose (intent → components)
-    const llmResponse = await cachedLLM(`Decompose this purchase intent into 4-6 key components: ${prompt}. List as bullets: • Component Name`);
+    // Step 1: AI Decompose into 4-6 components (full framework)
+    const llmResponse = await cachedLLM(`Decompose "${prompt}" into a complete 4-6 component framework for a full project. List as bullets: • Component 1 (description). Ensure it's a complete bundle, e.g., for home theater: TV, Receiver, Speakers, Subwoofer, Cables, Mount.`);
 
     let components = llmResponse
       .split('\n')
       .map(line => line.replace(/• |^\s*- /g, '').trim())
       .filter(line => line.length > 5);
 
-    // Fallback if AI returns nothing
-    if (components.length === 0) {
-      components = ['Main Item', 'Accessory 1', 'Accessory 2', 'Accessory 3'];
+    // Fallback for 4-6 full components
+    if (components.length < 4) {
+      components = [
+        'Main Device (e.g., TV or Core Item)',
+        'Audio System (e.g., Soundbar or Speakers)',
+        'Receiver/Processor',
+        'Subwoofer/Bass',
+        'Cables & Accessories',
+        'Mount/Setup Hardware'
+      ];
     }
 
-    // Step 2: Search whole web for each component
-    const searchPromises = components.map(comp => searchWholeWeb(`${comp} ${prompt} best deals 2025`));
+    // Step 2: Search whole web (shopping only)
+    const searchPromises = components.map(comp => searchWholeWeb(`${comp} ${prompt} buy 2025`));
     const allResults = await Promise.all(searchPromises);
 
-    // Step 3: Group into bundles (diverse sources)
-    const bundles = ['Budget Bundle', 'Mid-Range Bundle', 'Premium Bundle'];
+    // Step 3: Build full bundles (4-6 items each)
+    const bundles = ['Starter Bundle', 'Mid-Range Bundle', 'Premium Bundle'];
     const roadmap = bundles.map((bundleName, i) => {
-      const bundleProducts = allResults.slice(i * 2, (i + 1) * 2).flat();  // Rotate for diversity
+      const bundleProducts = allResults.slice(i * 1, (i + 1) * 1).flat();  // Distribute results
       const totalPrice = bundleProducts.reduce((sum, p) => sum + (parseFloat(p.price?.replace('$', '') || 0)), 0).toFixed(0);
       return {
         name: bundleName,
-        products: bundleProducts.slice(0, 4),  // 4 items per bundle
+        products: bundleProducts.slice(0, 6),  // 4-6 components
         totalPrice: `$${totalPrice}`,
       };
     });
@@ -42,6 +49,6 @@ export async function POST(request) {
     return Response.json({ roadmap });
   } catch (err) {
     console.error(err);
-    return new Response('Search failed', { status: 500 });
+    return new Response('Failed to build bundle', { status: 500 });
   }
 }

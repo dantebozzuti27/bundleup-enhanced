@@ -1,7 +1,7 @@
 // app/solution-engine/page.js
 'use client';
 
-import Roadmap from '@/components/Roadmap';
+import Roadmap from '@/components/Roadmap';  // ← DEFAULT IMPORT
 import { useState } from 'react';
 
 export default function SolutionEngine() {
