@@ -10,8 +10,8 @@ export async function POST(request) {
   }
 
   try {
-    // Step 1: AI Decompose
-    const llmResponse = await cachedLLM(`Decompose "${prompt}" into a complete 4-6 component framework. List as bullets: • Component 1 (description). Ensure complete bundle.`);
+    // Step 1: AI Decompose with FULL SCOPE
+    const llmResponse = await cachedLLM(`Analyze "${prompt}" as a complete project. Decompose into 4-6 key components. For each: • Component Name: Full description, specs, pricing range, compatibility, installation notes, and 2-3 alternatives. Ensure the full bundle is actionable (e.g., for home theater: TV, Receiver, Speakers, Subwoofer, Cables, Mount with total cost and setup guide).`);
 
     let components = llmResponse
       .split('\n')
@@ -29,7 +29,7 @@ export async function POST(request) {
       ];
     }
 
-    // Step 2: Search with comp in scope
+    // Step 2: Search with mode
     const searchPromises = components.map(comp => {
       const searchQuery = mode === 'new'
         ? `${comp} ${prompt} buy now new in stock ship to US 2025`

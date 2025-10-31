@@ -1,13 +1,14 @@
 // app/solution-engine/page.js
 'use client';
 
-import Roadmap from '@/components/Roadmap';  // ← DEFAULT IMPORT
+import Roadmap from '@/components/Roadmap';
 import { useState } from 'react';
 
 export default function SolutionEngine() {
   const [roadmap, setRoadmap] = useState(null);
   const [loading, setLoading] = useState(false);
   const [input, setInput] = useState('');
+  const [mode, setMode] = useState('new');  // Default: new products
 
   const generate = async () => {
     if (!input.trim()) return alert('Enter your goal');
@@ -17,7 +18,7 @@ export default function SolutionEngine() {
       const res = await fetch('/api/parse-intent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: input }),
+        body: JSON.stringify({ prompt: input, mode }),
       });
 
       if (!res.ok) throw new Error(await res.text());
@@ -29,6 +30,11 @@ export default function SolutionEngine() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const swapMode = () => {
+    setMode(mode === 'new' ? 'used' : 'new');
+    setRoadmap(null);  // Re-generate
   };
 
   return (
@@ -46,10 +52,19 @@ export default function SolutionEngine() {
         <button
           onClick={generate}
           disabled={loading}
-          className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 disabled:opacity-50"
+          className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 disabled:opacity-50 mb-4"
         >
           {loading ? 'Analyzing...' : 'Generate Solution'}
         </button>
+
+        {roadmap && (
+          <button
+            onClick={swapMode}
+            className="w-full bg-gray-600 text-white py-2 rounded-lg font-bold hover:bg-gray-700 mb-4"
+          >
+            {mode === 'new' ? 'Swap for Used/Refurbished Options (Save 20-40%)' : 'Swap Back to New Products'}
+          </button>
+        )}
 
         {loading && (
           <div className="mt-8 space-y-4">
