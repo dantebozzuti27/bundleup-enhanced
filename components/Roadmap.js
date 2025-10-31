@@ -10,30 +10,40 @@ export default function Roadmap({ items }) {
   };
 
   return (
-    <div className="mt-8 space-y-4">
-      {items.map((cat, i) => (
-        <div key={i} className="bg-white rounded-xl shadow-md">
+    <div className="mt-8 space-y-6">
+      {items.map((bundle, i) => (
+        <div key={i} className="bg-white rounded-xl shadow-lg overflow-hidden">
           <button
             onClick={() => toggle(i)}
-            className="w-full px-6 py-4 text-left flex justify-between items-center bg-blue-600 text-white font-bold rounded-t-xl"
+            className="w-full px-6 py-4 text-left flex justify-between items-center bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold"
           >
-            {cat.name} {cat.products.length > 0 && `(${cat.products.length})`}
-            <span>{open.includes(i) ? '−' : '+'}</span>
+            <span>{bundle.name}</span>
+            <span>{bundle.totalPrice} (from {bundle.products.map(p => p.retailer).filter(Boolean).join(', ')})</span>
           </button>
           {open.includes(i) && (
-            <div className="p-4">
-              {cat.products.length === 0 ? (
-                <p className="text-gray-500">Searching Amazon, Best Buy, B&H...</p>
-              ) : (
-                <div className="space-y-3">
-                  {cat.products.map((p, j) => (
-                    <a key={j} href={p.link} target="_blank" className="block p-3 border rounded-lg hover:bg-gray-50">
-                      <div className="font-medium">{p.title}</div>
-                      <div className="text-green-600">{p.price}</div>
-                    </a>
-                  ))}
-                </div>
-              )}
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {bundle.products.map((p, j) => (
+                  <a
+                    key={j}
+                    href={p.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center space-x-3 p-4 border rounded-lg hover:shadow-md transition"
+                  >
+                    {p.image && <img src={p.image} alt={p.title} className="w-20 h-20 object-cover rounded" />}
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-sm">{p.title}</h4>
+                      {p.price && <p className="text-green-600 font-bold text-lg">{p.price}</p>}
+                      <p className="text-xs text-gray-500">{p.retailer} • {p.rating}⭐</p>
+                      <p className="text-xs text-blue-600">View Product</p>
+                    </div>
+                  </a>
+                ))}
+              </div>
+              <div className="mt-4 p-3 bg-blue-50 rounded text-center">
+                <p className="text-blue-800 font-semibold">Diverse sources: {bundle.products.length} items from web-wide search</p>
+              </div>
             </div>
           )}
         </div>
